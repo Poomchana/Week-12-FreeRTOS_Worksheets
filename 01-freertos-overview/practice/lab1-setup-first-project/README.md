@@ -219,22 +219,39 @@ idf.py build
 
 ## Checklist การทำงาน
 
-- [ ] ตรวจสอบ ESP-IDF environment สำเร็จ
-- [ ] สร้างโปรเจกต์ใหม่ได้
-- [ ] เข้าใจโครงสร้างโปรเจกต์
-- [ ] Build โปรเจกต์สำเร็จ
-- [ ] แก้ไขโค้ดและ build ใหม่ได้
-- [ ] เข้าใจไฟล์ CMakeLists.txt
-- [ ] ทำแบบฝึกหัดครบ
+- [ ✓] ตรวจสอบ ESP-IDF environment สำเร็จ
+- [ ✓] สร้างโปรเจกต์ใหม่ได้
+- [ ✓] เข้าใจโครงสร้างโปรเจกต์
+- [ ✓] Build โปรเจกต์สำเร็จ
+- [ ✓] แก้ไขโค้ดและ build ใหม่ได้
+- [ ✓] เข้าใจไฟล์ CMakeLists.txt
+- [ ✓] ทำแบบฝึกหัดครบ
 
 ## คำถามทบทวหน
 
 1. ไฟล์ใดบ้างที่จำเป็นสำหรับโปรเจกต์ ESP-IDF ขั้นต่ำ?
+   - CMakeLists.txt (root) — สำหรับ build configuration ของโปรเจกต์
+main/CMakeLists.txt — สำหรับ component หลัก
+main/hello_esp32.c — ไฟล์ source code หลัก
+sdkconfig — ไฟล์ configuration ของโปรเจกต์ (สร้างหลัง build)
+ไฟล์อื่น ๆ ของ toolchain และ ESP-IDF จะถูกใช้เป็น dependencies
 2. ความแตกต่างระหว่าง `hello_esp32.bin` และ `hello_esp32.elf` คืออะไร?
+- hello_esp32.bin — ไฟล์ binary สำหรับ flash ลง ESP32
+hello_esp32.elf — ไฟล์ ELF มี debug information สำหรับ debugging และ analysis
 3. คำสั่ง `idf.py set-target` ทำอะไร?
+- กำหนด target chip ของโปรเจกต์ เช่น esp32, esp32s2
+ใช้เพื่อเลือก toolchain และ configuration ให้ตรงกับ hardware
 4. โฟลเดอร์ `build/` มีไฟล์อะไรบ้าง?
+- bootloader/ — ไฟล์ bootloader ของ ESP32
+partition_table/ — ไฟล์ partition table
+hello_esp32.bin — Binary ของ main application
+hello_esp32.elf — ELF file พร้อม debug info
+flash_args — Arguments สำหรับ flash
 5. การใช้ `vTaskDelay()` แทน `delay()` มีความสำคัญอย่างไร?
-
+- vTaskDelay() ทำให้ task yield CPU ให้ task อื่นทำงาน
+ป้องกัน blocking ระบบ FreeRTOS
+ทำให้ multitasking ทำงานได้อย่างมีประสิทธิภาพ และระบบไม่ค้างเมื่อ task หนึ่งทำงานนาน
+delay() จะ block ทั้ง CPU ทำให้ response time และ determinism ลดลง
 ## บทสรุป
 
 ในแลปนี้คุณได้เรียนรู้:
