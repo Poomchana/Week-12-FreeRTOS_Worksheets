@@ -407,21 +407,47 @@ ESP_LOGI(TAG, "Task state: %s", state_names[state]);
 
 ## Checklist การทำงาน
 
-- [ ] สร้าง Task พื้นฐานสำเร็จ
-- [ ] เข้าใจ Task parameters และ return values
-- [ ] ทดสอบ Task priorities
-- [ ] ใช้ Task management APIs (suspend/resume)
-- [ ] แสดง runtime statistics
-- [ ] ทำแบบฝึกหัดครบ
+- [ ✓] สร้าง Task พื้นฐานสำเร็จ
+- [ ✓] เข้าใจ Task parameters และ return values
+- [ ✓] ทดสอบ Task priorities
+- [ ✓] ใช้ Task management APIs (suspend/resume)
+- [ ✓] แสดง runtime statistics
+- [ ✓] ทำแบบฝึกหัดครบ
 
 ## คำถามทบทวน
 
 1. เหตุใด Task function ต้องมี infinite loop?
-2. ความหมายของ stack size ใน xTaskCreate() คืออะไร?
-3. ความแตกต่างระหว่าง vTaskDelay() และ vTaskDelayUntil()?
-4. การใช้ vTaskDelete(NULL) vs vTaskDelete(handle) ต่างกันอย่างไร?
-5. Priority 0 กับ Priority 24 อันไหนสูงกว่า?
+-Task จะทำงานต่อเนื่องตลอดเวลาที่ระบบรัน
+FreeRTOS ไม่คืน control ให้ main task ถ้า task จบ (return)
+Infinite loop ช่วยให้ task ทำงานต่อเนื่องตามลำดับเวลา (periodic) หรือรอ event
+ถ้าต้องการจบ task ให้เรียก vTaskDelete(NULL) แทน
 
+2. ความหมายของ stack size ใน xTaskCreate() คืออะไร?
+- Stack size คือ จำนวนหน่วยความจำที่ task ใช้สำหรับ stack
+Stack ใช้เก็บ:
+Local variables ของ task
+Return addresses ของฟังก์ชัน
+Context ของ task ขณะถูก preempted
+ขนาดไม่เพียงพอ → เกิด stack overflow
+ขนาดมากเกินไป → เสีย memory ของระบบ
+3. ความแตกต่างระหว่าง vTaskDelay() และ vTaskDelayUntil()?
+- vTaskDelay(ticks):
+หน่วง task เป็นเวลาที่กำหนด (relative delay)
+ไม่แม่นยำสำหรับ periodic task เพราะ cumulative error จะเกิด
+vTaskDelayUntil(&last_wake_time, ticks):
+หน่วง task จนถึงเวลาที่กำหนด (absolute delay)
+เหมาะสำหรับ periodic task เพราะ timing แม่นยำ ไม่สะสม error
+ต้องส่ง pointer ไปยังตัวแปร last_wake_time ที่เก็บเวลาที่ task รันครั้งล่าสุด
+4. การใช้ vTaskDelete(NULL) vs vTaskDelete(handle) ต่างกันอย่างไร?
+- vTaskDelete(NULL):
+Task ที่เรียกฟังก์ชันนี้จะลบตัวเอง
+vTaskDelete(handle):
+ลบ task อื่นที่มี handle กำหนด
+ใช้สำหรับ task management เช่น suspend/resume/delete tasks จาก task manager
+5. Priority 0 กับ Priority 24 อันไหนสูงกว่า?
+- Priority 24 สูงกว่า Priority 0
+FreeRTOS ใช้ priority สูงกว่า = task มีสิทธิ์รันก่อน
+Task priority 0 = ต่ำสุด, 24 = สูงสุด (ESP32 FreeRTOS default max = 24)
 ## บทสรุป
 
 ในแลปนี้คุณได้เรียนรู้:
