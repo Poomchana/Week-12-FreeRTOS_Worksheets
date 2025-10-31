@@ -366,11 +366,38 @@ xTaskCreatePinnedToCore(low_priority_task, "LowPrio", 3072, NULL, 1, NULL, 1);  
 ## คำถามสำหรับวิเคราะห์
 
 1. Priority ไหนทำงานมากที่สุด? เพราะอะไร?
+- High Priority Task (Priority 5) ทำงานมากที่สุด
+เพราะ FreeRTOS ใช้ preemptive scheduling
+Task ที่ priority สูงกว่าจะ ขัดจังหวะ (preempt) Task ที่ priority ต่ำกว่า
+Task ต่ำกว่าจะทำงานก็ต่อเมื่อไม่มี task priority สูงทำงาน
 2. เกิด Priority Inversion หรือไม่? จะแก้ไขได้อย่างไร?
+- Priority Inversion เกิดขึ้นเมื่อ:
+Low Priority Task ถือ resource ที่ High Priority Task ต้องการ
+High Priority Task ถูก block จน Low Priority Task เสร็จ
+วิธีแก้ไข:
+ใช้ Priority Inheritance:
+FreeRTOS มี mutex แบบ Priority Inheritance Mutex
+Low Priority Task จะถูกเพิ่ม priority ชั่วคราวเพื่อให้ High Priority Task ได้ resource เร็วขึ้น
+ลดเวลาใช้ resource ใน Low Priority Task
+จัดลำดับ resource ให้ถูกต้อง
 3. Tasks ที่มี priority เดียวกันทำงานอย่างไร?
+- FreeRTOS ใช้ Round-Robin Scheduling สำหรับ tasks ที่ priority เท่ากัน
+Task จะสลับกันทำงานตาม time slice
+ทำให้ CPU utilization ของ tasks เท่ากันโดยประมาณ
+ต้องมี vTaskDelay() หรือ yield เพื่อให้ scheduler สลับ task ได้
 4. การเปลี่ยน Priority แบบ dynamic ส่งผลอย่างไร?
-5. CPU utilization ของแต่ละ priority เป็นอย่างไร?
+- การเปลี่ยน priority ขณะ runtime จะเปลี่ยน ลำดับการทำงาน ของ tasks
+Low Priority Task ที่ถูกเพิ่ม priority จะ ทำงานมากขึ้น หรือ preempt task อื่นที่ priority ต่ำกว่า
+Dynamic priority สามารถใช้เพื่อ แก้ปัญหา priority inversion หรือปรับ workload
 
+5. CPU utilization ของแต่ละ priority เป็นอย่างไร?
+-High Priority: ใช้งาน CPU มากที่สุด (~40-50%)
+Medium Priority: ใช้งาน CPU ปานกลาง (~25-35%)
+Low Priority: ใช้งาน CPU น้อยที่สุด (~15-25%)
+Tasks ที่ priority เท่ากัน (Round-Robin) จะ แชร์ CPU อย่างสมเหตุสมผล
+CPU utilization ขึ้นอยู่กับ:
+Task work length
+Ta
 ## ผลการทดลองที่คาดหวัง
 
 | Priority | Expected Runs | Percentage | Behavior |
